@@ -1,0 +1,58 @@
+{
+    "Resources": {
+        "AutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "Cooldown": 300,
+                "LaunchConfigurationName": "${launch_config_name}",
+                "MaxSize": "${node_max_size}",
+                "MinSize": "${node_min_size}",
+                "DesiredCapacity": "${node_desired_size}",
+                "HealthCheckType": "EC2",
+                "MetricsCollection": [
+                    {
+                        "Granularity": "1Minute",
+                        "Metrics": [
+                            "GroupMinSize",
+                            "GroupMaxSize",
+                            "GroupDesiredCapacity",
+                            "GroupInServiceInstances",
+                            "GroupPendingInstances",
+                            "GroupStandbyInstances",
+                            "GroupTerminatingInstances",
+                            "GroupTotalInstances"
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "test-asg-tf",
+                        "PropagateAtLaunch": true
+                    }
+                ],
+                "TerminationPolicies": [
+                    "OldestLaunchConfiguration",
+                    "OldestInstance",
+                    "Default"
+                ],
+                "VPCZoneIdentifier": ["${subnet}"]
+            },
+            "UpdatePolicy": {
+                "AutoScalingRollingUpdate": {
+                    "MinInstancesInService": "${node_min_size}",
+                    "MaxBatchSize": "1",
+                    "PauseTime": "PT120S"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "AsgName": {
+            "Description": "The name of the auto scaling group",
+            "Value": {
+                "Ref": "AutoScalingGroup"
+            }
+        }
+    }
+}
